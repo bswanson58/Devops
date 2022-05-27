@@ -1,0 +1,33 @@
+version: '3.7'
+
+networks:
+  jenkins:
+    driver: bridge
+    name: jenkins
+
+services:
+  jenkins:
+    container_name: jenkins-master
+    image: jenkins/jenkins:lts-jdk11
+#    privileged: true
+    user: jenkins
+    networks:
+      - jenkins
+    ports: 
+      - 8080:8080
+#      - 50000:50000
+    volumes:
+      - D:/Development/Jenkins_Home:/var/jenkins_home
+#      - /var/run/docker.sock:/var/run/docker.sock
+
+#  jenkins_agent1:
+#    image: jenkins/inbound-agent:latest
+#    privileged: true
+#    user: root
+#    container_name: jenkins-agent-1
+#    networks:
+#      - jenkins
+#    environment:
+#      - JENKINS_SECRET=11da9b4b4bc85f2dee5124ed0d127a68bd6afa5abab5ef1b4891b032472efb05
+#      - JENKINS_URL=http://jenkins-master:8080
+#      - JENKINS_AGENT_NAME=Agent1

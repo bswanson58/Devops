@@ -1,0 +1,50 @@
+Docker -> Setup:
+> Use the WSL2 based engine
+> Expose daemon on tcp://localhost:2375 without TLS
+> Switch to Linux Containers (tray command)
+
+Jenkins run command:
+docker> docker run -d -p 8080:8080 -p 50000:50000 --user root --name jenkins-master --network jenkins -v D:/Development/Jenkins_Home:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock jenkins/jenkins:lts-jdk11
+compose> docker-compose -p jenkins_farm up -d
+
+Jenkins configuration for Docker:
+
+Dashboard -> Manage Jenkins -> Manage Plugins
+> Install 'Docker' (Cloud provider - This plugin integrates Jenkins with Docker)
+
+Dashboard -> Manage Jenkins -> Manage Nodes and Clouds -> Configure Clouds -> Docker Cloud Details
+> Add a new cloud: Docker
+> Docker Host URI: tcp://host.docker.internal:2375
+> Enabled: true
+
+Dashboard -> Manage Jenkins -> Manage Nodes and Clouds -> Configure Clouds -> Docker Agent Templates
+> Labels: {something used by jobs to specify the agent}
+> Enabled: true
+> Name: anything descriptive
+> Docker Image: an appropriate image name
+> Remote File System Root: /home/jenkins
+> Connect Method: Connect with JNLP
+> Jenkins URL: http://jenkins-master:8080 (the name given the jenkins master container in Docker)
+> Pull Strategy: Never Pull (if the image is located locally)
+
+Dashboard -> Manage Jenkins -> Manage Nodes and Clouds -> Configure Clouds -> Docker Agent Templates -> Container Settings
+> Network: jenkins (the network name of the master node)
+
+Jenkins Freestyle Job:
+> Restrict where this project can be run: checked
+> Label Expression: valid value from a Docker Agent Template Label
+
+Jenkins Pipeline Job:
+> Script:
+pipeline {
+    agent { 
+        label "some-agent-label" 
+    }
+    stages {
+        stage('Hello') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+    }
+}
